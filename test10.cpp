@@ -2,10 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <set>
-int tempNum[81] ;   
-int tempSp= 0 ; 
-int push(int nextblank);
-int pop();
+
 using namespace std;
 bool check(int A[][9], int nextblank, int num)
 {
@@ -13,19 +10,11 @@ bool check(int A[][9], int nextblank, int num)
 	int col=nextblank%9;
 	int row=nextblank/9;
     for(i=0;i<9;i++)
-	{
-	    if(A[row][i]==num)
+	    if(A[row][i]==num||A[i][col]==num)
 		    return false;	
-		if(A[i][col]==num)
-			return false;
-	}
 	for(i=0;i<3;i++)
-    {
-		if(A[(row/3)*3][i+(col/3)*3])
+		if(A[(row/3)*3][i+(col/3)*3]||A[i+(row/3)*3][(col/3)*3])
 				return false;
-		else if(A[i+(row/3)*3][(col/3)*3])
-				return false;
-	}
 	return true;
 }
 int findblank(int A[][9],int blank)
@@ -34,32 +23,44 @@ int findblank(int A[][9],int blank)
     for(nextblank=blank;nextblank<81;nextblank++)
 	{
 	    if(A[nextblank/9][nextblank%9]==0)
-		    break;
+		    return nextblank;
 	}
-    return nextblank;
+    return 81;
 }	
-
-int solve(int A[][9])
+int print(int A[][9]);
+int solve(int A[][9],int blank)
 {
-    int nextblank=findblank(A,0);
-	int num;
+	int nextblank=findblank(A,blank);
+	int i,j,num;
+	if(nextblank==81)
+	{
+		    for (i=0; i<9; ++i) 
+			for(j=0;j<9;j++)
+			{
+				      printf("%d ", A[i][j]);
+					        if (j==8) printf("\n");
+							    }
+			    printf("\n");
+				    return 0;
+					  }
 	for(num=1;num<=10;num++)
-    {	
-	    if(num>9)
+	{
+		if(num>9)
 		{
 			A[nextblank/9][nextblank%9]=0;
-	        pop();
 		}
 		else
 		{
 			if(check(A,nextblank,num))
 			{
 				A[nextblank/9][nextblank%9]=num;
-				push(nextblank);
-				nextblank=findblank(A,nextblank);
+				if(solve(A,nextblank+1)==1)
+					return 1;
+				A[nextblank/9][nextblank%9]=0;
 			}
 		}
 	}
+	return 0;
 }
 int print(int A[][9])
 {
@@ -68,16 +69,6 @@ int print(int A[][9])
 	    for(j=0; j<9; j++)
          	printf("%d%c ", A[i][j],(j+1)%9==0?'\n':' ');
 	return 0;
-}
-int push(int nextblank) 
-{
-	tempNum[tempSp++]= nextblank ;
-}
- 	   		
-int pop() 
-{
-	if(tempSp<=0) return(-1) ;
-	else return(tempNum[--tempSp]) ;
 }
 int main()
 {
@@ -91,8 +82,7 @@ int main()
 		{9,3,0,4,0,2,0,0,7},
 		{5,0,0,0,0,0,0,0,0},
 		{0,1,2,0,9,0,0,3,0}};
-	solve(A);
-	print(A);
+	solve(A,0);
 	return 0;
 }
 
